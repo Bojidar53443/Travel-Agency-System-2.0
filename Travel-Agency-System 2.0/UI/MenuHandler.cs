@@ -86,5 +86,38 @@ namespace Travel_Agency_System_2._0.UI
             string voucher = _voucherService.GenerateVoucher(bId);
             Console.WriteLine("\n" + voucher);
         }
+        public void HandleTripMenu()
+        {
+            bool back = false;
+            while (!back)
+            {
+                Console.Clear();
+                Console.WriteLine("=== Меню за пътувания ===");
+                Console.WriteLine("1. Добави пътуване");
+                Console.WriteLine("2. Прегледай всички пътувания");
+                Console.WriteLine("3. Редактирай пътуване");
+                Console.WriteLine("4. Изтрий пътуване");
+                Console.WriteLine("0. Назад");
+                Console.Write("Избор: ");
+
+                string tripChoice = Console.ReadLine();
+
+                switch (tripChoice)
+                {
+                    case "1": /* логика за добавяне на пътуване */ break;
+                    case "2": /* показване на списък */ break;
+                    case "3": /* редактиране */ break;
+                    case "4": /* изтриване */ break;
+                    case "0": back = true; break;
+                    default: Console.WriteLine("Невалидна опция!"); break;
+                }
+
+                if (!back)
+                {
+                    Console.WriteLine("\nНатиснете клавиш за продължение...");
+                    Console.ReadKey();
+                }
+            }
+        }
     }
 }
