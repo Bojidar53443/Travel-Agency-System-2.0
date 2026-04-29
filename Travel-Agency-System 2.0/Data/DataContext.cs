@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Travel_Agency_System_2._0.Models;
 namespace Travel_Agency_System_2._0.Data
 {
     internal class DataContext
