@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Travel_Agency_System_2._0.Reports;
+using Travel_Agency_System_2._0.Services;
 namespace Travel_Agency_System_2._0.UI
 {
     internal class MenuHandler

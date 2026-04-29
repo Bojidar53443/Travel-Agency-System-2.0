@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Travel_Agency_System_2._0.Data;
-
+using Travel_Agency_System_2._0.Enums;
+using Travel_Agency_System_2._0.Models;
 namespace Travel_Agency_System_2._0.Services
 {
     internal class BookingManager
