@@ -92,29 +92,82 @@ namespace Travel_Agency_System_2._0.UI
             while (!back)
             {
                 Console.Clear();
-                Console.WriteLine("=== Меню за пътувания ===");
-                Console.WriteLine("1. Добави пътуване");
+                Console.WriteLine("=== УПРАВЛЕНИЕ НА ПЪТУВАНИЯ ===");
+                Console.WriteLine("1. Добави ново пътуване");
                 Console.WriteLine("2. Прегледай всички пътувания");
-                Console.WriteLine("3. Редактирай пътуване");
-                Console.WriteLine("4. Изтрий пътуване");
+                Console.WriteLine("3. Изтрий пътуване");
                 Console.WriteLine("0. Назад");
+                Console.WriteLine("-------------------------------");
                 Console.Write("Избор: ");
 
                 string tripChoice = Console.ReadLine();
 
                 switch (tripChoice)
                 {
-                    case "1": /* логика за добавяне на пътуване */ break;
-                    case "2": /* показване на списък */ break;
-                    case "3": /* редактиране */ break;
-                    case "4": /* изтриване */ break;
-                    case "0": back = true; break;
-                    default: Console.WriteLine("Невалидна опция!"); break;
+                    case "1":
+                        Console.Clear();
+                        Console.WriteLine("--- ДОБАВЯНЕ НА ПЪТУВАНЕ ---");
+
+                        Console.Write("Основна дестинация: ");
+                        string dest = Console.ReadLine();
+
+                        Console.Write("Начална дата (гггг-мм-дд): ");
+                        if (!DateTime.TryParse(Console.ReadLine(), out DateTime startDate)) break;
+
+                        Console.Write("Крайна дата (гггг-мм-дд): ");
+                        if (!DateTime.TryParse(Console.ReadLine(), out DateTime endDate)) break;
+
+                        Console.Write("Максимален капацитет: ");
+                        if (!int.TryParse(Console.ReadLine(), out int capacity)) break;
+
+                        Console.Write("Базова цена: ");
+                        if (!decimal.TryParse(Console.ReadLine(), out decimal price)) break;
+
+                        _tripMgr.CreateTrip(dest, startDate, endDate, capacity, price);
+                        Console.WriteLine("\n✅ Пътуването е добавено успешно!");
+                        break;
+
+                    case "2":
+                        Console.Clear();
+                        Console.WriteLine("--- СПИСЪК С ВСИЧКИ ПЪТУВАНИЯ ---");
+                        var trips = _tripMgr.GetAllTrips();
+
+                        if (trips.Count == 0)
+                        {
+                            Console.WriteLine("Няма регистрирани пътувания.");
+                        }
+                        else
+                        {
+                            foreach (var t in trips)
+                            {
+                                Console.WriteLine($"ID: {t.Id} | Дестинация: {t.MainDestination} | Дата: {t.StartDate.ToShortDateString()} | Места: {t.MaxCapacity} | Цена: {t.BasePrice:F2} лв.");
+                            }
+                        }
+                        break;
+
+                    case "3":
+                        Console.Clear();
+                        Console.WriteLine("--- ИЗТРИВАНЕ НА ПЪТУВАНЕ ---");
+                        Console.Write("Въведете ID на пътуването: ");
+                        if (int.TryParse(Console.ReadLine(), out int idToDelete))
+                        {
+                            _tripMgr.DeleteTrip(idToDelete);
+                            Console.WriteLine("\n🗑️ Пътуването беше премахнато (ако е съществувало).");
+                        }
+                        break;
+
+                    case "0":
+                        back = true;
+                        break;
+
+                    default:
+                        Console.WriteLine("Невалидна опция!");
+                        break;
                 }
 
                 if (!back)
                 {
-                    Console.WriteLine("\nНатиснете клавиш за продължение...");
+                    Console.WriteLine("\nНатиснете клавиш за връщане към менюто...");
                     Console.ReadKey();
                 }
             }

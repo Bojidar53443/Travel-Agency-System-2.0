@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Travel_Agency_System_2._0.Data;
 using Travel_Agency_System_2._0.Models;
+
 namespace Travel_Agency_System_2._0.Services
 {
     internal class TripManager
     {
         public void CreateTrip(string destination, DateTime start, DateTime end, int capacity, decimal price)
         {
-            int nextId = DataContext.Trips.Count + 1;
+            int nextId = DataContext.Trips.Count > 0 ? DataContext.Trips.Max(t => t.Id) + 1 : 1;
             var trip = new Trip
             {
                 Id = nextId,
@@ -24,6 +23,19 @@ namespace Travel_Agency_System_2._0.Services
             DataContext.Trips.Add(trip);
         }
 
+        public List<Trip> GetAllTrips()
+        {
+            return DataContext.Trips;
+        }
+
+        public void DeleteTrip(int id)
+        {
+            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == id);
+            if (trip != null)
+            {
+                DataContext.Trips.Remove(trip);
+            }
+        }
 
         public void AddStopToTrip(int tripId, string stopName)
         {
@@ -33,7 +45,6 @@ namespace Travel_Agency_System_2._0.Services
                 trip.AdditionalStops.Add(stopName);
             }
         }
-
 
         public int GetAvailableSeats(int tripId)
         {
