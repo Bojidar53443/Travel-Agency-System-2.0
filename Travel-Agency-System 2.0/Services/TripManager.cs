@@ -51,5 +51,31 @@ namespace Travel_Agency_System_2._0.Services
             var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
             return trip != null ? trip.AvailableSeats : 0;
         }
+        public void SetPriceRules(int tripId, string season, string serviceType, decimal multiplier)
+        {
+            
+            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+
+            if (trip != null)
+            {
+                
+                trip.BasePrice *= multiplier;
+
+                
+            }
+        }
+        public bool ConfirmTripStatus(int tripId, int minParticipants)
+        {
+            
+            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+            if (trip == null) return false;
+
+            
+            {
+                return trip.RegisteredClientIds.Count >= minParticipants;
+            }
+
+            return false;
+        }
     }
 }

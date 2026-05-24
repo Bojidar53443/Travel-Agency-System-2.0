@@ -22,6 +22,7 @@ namespace Travel_Agency_System_2._0.Services
             };
             DataContext.Clients.Add(client);
         }
+       
 
 
         public bool UpdateClient(int clientId, string newPhone, string newEmail)
