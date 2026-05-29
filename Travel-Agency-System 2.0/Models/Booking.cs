@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic; // Задължително, за да работи List<>
+using System.Collections.Generic;
 using Travel_Agency_System_2._0.Enums;
 
 namespace Travel_Agency_System_2._0.Models
@@ -12,6 +12,9 @@ namespace Travel_Agency_System_2._0.Models
         public int PeopleCount { get; set; }
         public BookingStatus Status { get; set; }
         public decimal FinalPrice { get; set; }
+
+        public Client Client { get; set; }
+        public Trip Trip { get; set; }
 
         public List<ExtraService> ExtraServices { get; set; } = new List<ExtraService>();
     }

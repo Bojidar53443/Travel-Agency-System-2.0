@@ -15,5 +15,6 @@ namespace Travel_Agency_System_2._0.Models
         public string EmailAddress { get; set; }
         public string PhoneNumber { get; set; }
 
+        public List<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

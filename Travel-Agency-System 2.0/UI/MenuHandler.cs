@@ -341,7 +341,7 @@ namespace Travel_Agency_System_2._0.UI
                     Console.WriteLine("\n--- ПРЕДСТОЯЩИ ПЪТУВАНИЯ ---");
                     foreach (var t in upcoming)
                     {
-                        // Увери се дали е t.Destination или t.MainDestination спрямо твоя модел Trip
+                        
                         Console.WriteLine($"- [{t.StartDate.ToShortDateString()}] {t.MainDestination} - Оставаат места: {t.AvailableSeats}");
                     }
                     break;
