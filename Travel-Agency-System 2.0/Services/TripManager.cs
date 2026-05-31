@@ -2,12 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using Travel_Agency_System_2._0.Data;
+using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
 
 namespace Travel_Agency_System_2._0.Services
 {
     internal class TripManager
     {
+        private readonly ITripRepository _tripRepo;
+
+        public TripManager(ITripRepository tripRepo)
+        {
+            _tripRepo = tripRepo;
+        }
+
+        public IReadOnlyList<Trip> GetAllTrips()
+        {
+            return _tripRepo.GetAll();
+        }
         public void CreateTrip(string destination, DateTime start, DateTime end, int capacity, decimal price)
         {
             int nextId = DataContext.Trips.Count > 0 ? DataContext.Trips.Max(t => t.Id) + 1 : 1;
@@ -23,7 +35,7 @@ namespace Travel_Agency_System_2._0.Services
             DataContext.Trips.Add(trip);
         }
 
-        public List<Trip> GetAllTrips()
+        public List<Trip> GetAllTrips1()
         {
             return DataContext.Trips;
         }

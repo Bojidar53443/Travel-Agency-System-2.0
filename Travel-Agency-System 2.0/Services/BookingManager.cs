@@ -5,13 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Travel_Agency_System_2._0.Data;
 using Travel_Agency_System_2._0.Enums;
+using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
 
 namespace Travel_Agency_System_2._0.Services
 {
     internal class BookingManager
     {
-        
+        private readonly IBookingRepository _bookingRepo;
+
+       
+        public BookingManager(IBookingRepository bookingRepo)
+        {
+            _bookingRepo = bookingRepo ?? throw new ArgumentNullException(nameof(bookingRepo));
+        }
         public string MakeBooking(int clientId, int tripId, int peopleCount)
         {
             var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);

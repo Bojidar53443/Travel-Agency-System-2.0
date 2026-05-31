@@ -8,15 +8,31 @@ using Travel_Agency_System_2._0.Reports;
 using Travel_Agency_System_2._0.Services;
 namespace Travel_Agency_System_2._0.UI
 {
+   
     internal class MenuHandler
     {
+        
+        private readonly ClientManager _clientMgr;
+        private readonly TripManager _tripMgr;
+        private readonly BookingManager _bookingMgr;
 
-        private readonly ClientManager _clientMgr = new ClientManager();
-        private readonly TripManager _tripMgr = new TripManager();
-        private readonly BookingManager _bookingMgr = new BookingManager();
-        private readonly PaymentService _paymentService = new PaymentService();
-        private readonly VoucherService _voucherService = new VoucherService();
-        private readonly ReportService _reportService = new ReportService();
+        
+        private readonly PaymentService _paymentService;
+        private readonly VoucherService _voucherService;
+        private readonly ReportService _reportService;
+
+        
+        public MenuHandler(ClientManager clientMgr, TripManager tripMgr, BookingManager bookingMgr)
+        {
+            _clientMgr = clientMgr ?? throw new ArgumentNullException(nameof(clientMgr));
+            _tripMgr = tripMgr ?? throw new ArgumentNullException(nameof(tripMgr));
+            _bookingMgr = bookingMgr ?? throw new ArgumentNullException(nameof(bookingMgr));
+
+            
+            _paymentService = new PaymentService();
+            _voucherService = new VoucherService();
+            _reportService = new ReportService();
+        }
         public void ShowMainMenu()
         {
             Console.Clear();
@@ -124,7 +140,7 @@ namespace Travel_Agency_System_2._0.UI
                     case "2": 
                         Console.Clear();
                         Console.WriteLine("--- СПИСЪК С ВСИЧКИ ПЪТУВАНИЯ ---");
-                        var trips = _tripMgr.GetAllTrips();
+                        var trips = _tripMgr.GetAllTrips1();
 
                         if (trips.Count == 0)
                         {

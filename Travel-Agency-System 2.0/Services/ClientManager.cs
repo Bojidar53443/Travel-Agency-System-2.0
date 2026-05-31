@@ -4,11 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Travel_Agency_System_2._0.Data;
+using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
 namespace Travel_Agency_System_2._0.Services
 {
     internal class ClientManager
     {
+        private readonly IClientRepository _clientRepo;
+
+        public ClientManager(IClientRepository clientRepo)
+        {
+            _clientRepo = clientRepo;
+        }
         public void RegisterClient(string firstName, string lastName, string email, string phone)
         {
             int nextId = DataContext.Clients.Count + 1;
