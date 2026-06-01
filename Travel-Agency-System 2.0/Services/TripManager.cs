@@ -4,6 +4,7 @@ using System.Linq;
 using Travel_Agency_System_2._0.Data;
 using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
+using Travel_Agency_System_2._0.Repositories;
 
 namespace Travel_Agency_System_2._0.Services
 {
@@ -32,7 +33,8 @@ namespace Travel_Agency_System_2._0.Services
                 MaxCapacity = capacity,
                 BasePrice = price
             };
-            DataContext.Trips.Add(trip);
+
+            _tripRepo.Save(trip);
         }
 
         public List<Trip> GetAllTrips1()
