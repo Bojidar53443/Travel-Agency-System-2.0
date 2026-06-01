@@ -26,7 +26,6 @@ namespace Travel_Agency_System_2._0.Services
             int nextId = DataContext.Trips.Count > 0 ? DataContext.Trips.Max(t => t.Id) + 1 : 1;
             var trip = new Trip
             {
-                Id = nextId,
                 MainDestination = destination,
                 StartDate = start,
                 EndDate = end,
