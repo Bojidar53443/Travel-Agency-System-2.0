@@ -13,15 +13,17 @@ namespace Travel_Agency_System_2._0.Services
     internal class BookingManager
     {
         private readonly IBookingRepository _bookingRepo;
+        
+        private readonly ITripRepository _tripRepo;
 
-       
-        public BookingManager(IBookingRepository bookingRepo)
+        public BookingManager(IBookingRepository bookingRepo, ITripRepository tripRepo)
         {
-            _bookingRepo = bookingRepo ?? throw new ArgumentNullException(nameof(bookingRepo));
+            _bookingRepo = bookingRepo;
+            _tripRepo = tripRepo;
         }
         public string MakeBooking(int clientId, int tripId, int peopleCount)
         {
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+            var trip = _tripRepo.GetById(tripId);
             if (trip == null) return "Пътуването не е намерено.";
 
             if (trip.AvailableSeats < peopleCount)
@@ -29,7 +31,6 @@ namespace Travel_Agency_System_2._0.Services
 
             var booking = new Booking
             {
-                Id = DataContext.Bookings.Count + 1,
                 ClientId = clientId,
                 TripId = tripId,
                 PeopleCount = peopleCount,
@@ -38,15 +39,11 @@ namespace Travel_Agency_System_2._0.Services
 
             _bookingRepo.Save(booking);
 
-            for (int i = 0; i < peopleCount; i++)
-            {
-                trip.RegisteredClientIds.Add(clientId);
-            }
+            trip.MaxCapacity -= peopleCount;
+            _tripRepo.Update(trip);
 
             return "Резервацията е успешна!";
         }
-
-        
         public string MakeGroupBooking(List<int> clientIds, int tripId)
         {
             var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
