@@ -24,7 +24,7 @@ namespace Travel_Agency_System_2._0
 
             ClientManager clientManager = new ClientManager(clientRepo);
             TripManager tripManager = new TripManager(tripRepo);
-            BookingManager bookingManager = new BookingManager(bookingRepo);
+            BookingManager bookingManager = new BookingManager(bookingRepo, tripRepo);
 
             
             MenuHandler menu = new MenuHandler(clientManager, tripManager, bookingManager);
