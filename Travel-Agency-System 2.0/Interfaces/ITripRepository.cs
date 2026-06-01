@@ -5,11 +5,10 @@ namespace Travel_Agency_System_2._0.Interfaces
 {
     public interface ITripRepository
     {
-        Trip GetById(int id);
         IReadOnlyList<Trip> GetAll();
+        Trip GetById(int id);
         void Save(Trip trip);
         void Update(Trip trip);
-
         void Delete(Trip trip);
     }
 }

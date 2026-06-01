@@ -20,7 +20,7 @@ namespace Travel_Agency_System_2._0.Services
             return _tripRepo.GetAll();
         }
 
-        public void CreateTrip(string destination, DateTime start, DateTime end, int capacity, decimal price, string season, List<string> stops)
+        public void CreateTrip(string destination, DateTime start, DateTime end, int capacity, decimal price, string season, string serviceType)
         {
             var trip = new Trip
             {
@@ -30,10 +30,10 @@ namespace Travel_Agency_System_2._0.Services
                 MaxCapacity = capacity,
                 AvailableSeats = capacity,
                 BasePrice = price,
-                Price = price, 
+                Price = price,
                 Season = season,
-                ServiceType = "Standard",
-                AdditionalStops = stops
+                ServiceType = serviceType,
+                AdditionalStops = new List<string>()
             };
 
             _tripRepo.Save(trip);
@@ -45,8 +45,8 @@ namespace Travel_Agency_System_2._0.Services
             if (trip != null)
             {
                 trip.Season = season;
-                trip.ServiceType = serviceType; 
-                trip.Price = trip.BasePrice * multiplier; 
+                trip.ServiceType = serviceType;
+                trip.Price = trip.BasePrice * multiplier;
 
                 _tripRepo.Update(trip);
             }
@@ -64,12 +64,19 @@ namespace Travel_Agency_System_2._0.Services
             try
             {
                 var trip = _tripRepo.GetById(id);
-                _tripRepo.Delete(trip);
-                Console.WriteLine("\n✅ Пътуването е изтрито успешно!");
+                if (trip != null)
+                {
+                    _tripRepo.Delete(trip);
+                    Console.WriteLine("\n✅ Пътуването е изтрито успешно!");
+                }
+                else
+                {
+                    Console.WriteLine("\n❌ Пътуването не е намерено!");
+                }
             }
             catch (Exception)
             {
-                Console.WriteLine("\n❌ Грешка: Не съществува пътуване с такова ID!");
+                Console.WriteLine("\n❌ Възникна грешка при триенето!");
             }
         }
 
@@ -88,8 +95,6 @@ namespace Travel_Agency_System_2._0.Services
             var trip = _tripRepo.GetById(tripId);
             return trip != null ? trip.AvailableSeats : 0;
         }
-
-       
 
         public bool ConfirmTripStatus(int tripId, int minParticipants)
         {

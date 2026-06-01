@@ -66,5 +66,15 @@ namespace Travel_Agency_System_2._0.Repositories
                 .Where(b => b.ClientId == clientId)
                 .ToList();
         }
+
+        public void Delete(int id)
+        {
+            var booking = context.Bookings.FirstOrDefault(b => b.Id == id);
+            if (booking != null)
+            {
+                context.Bookings.Remove(booking);
+                context.SaveChanges();
+            }
+        }
     }
 }

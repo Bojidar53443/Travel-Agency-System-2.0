@@ -6,33 +6,30 @@ using System.Threading.Tasks;
 using Travel_Agency_System_2._0.Enums;
 using Travel_Agency_System_2._0.Reports;
 using Travel_Agency_System_2._0.Services;
+
 namespace Travel_Agency_System_2._0.UI
 {
-   
     internal class MenuHandler
     {
-        
         private readonly ClientManager _clientMgr;
         private readonly TripManager _tripMgr;
         private readonly BookingManager _bookingMgr;
 
-        
         private readonly PaymentService _paymentService;
         private readonly VoucherService _voucherService;
         private readonly ReportService _reportService;
 
-        
         public MenuHandler(ClientManager clientMgr, TripManager tripMgr, BookingManager bookingMgr)
         {
             _clientMgr = clientMgr ?? throw new ArgumentNullException(nameof(clientMgr));
             _tripMgr = tripMgr ?? throw new ArgumentNullException(nameof(tripMgr));
             _bookingMgr = bookingMgr ?? throw new ArgumentNullException(nameof(bookingMgr));
 
-            
             _paymentService = new PaymentService();
             _voucherService = new VoucherService();
             _reportService = new ReportService();
         }
+
         public void ShowMainMenu()
         {
             Console.Clear();
@@ -73,7 +70,7 @@ namespace Travel_Agency_System_2._0.UI
                 Console.Write("Въведете ID на клиента за редактиране: ");
                 if (!int.TryParse(Console.ReadLine(), out int id)) return;
                 Console.Write("Нов Телефон: "); string phone = Console.ReadLine();
-                Console.Write("Нов Email: "); string email = Console.ReadLine();    
+                Console.Write("Нов Email: "); string email = Console.ReadLine();
 
                 bool success = _clientMgr.UpdateClient(id, phone, email);
                 Console.WriteLine(success ? "\n✅ Данните бяха обновени!" : "\n❌ Клиентът не е намерен!");
@@ -136,13 +133,10 @@ namespace Travel_Agency_System_2._0.UI
                         Console.Write("Сезон (Low/Mid/High или Лято/Зима): ");
                         string season = Console.ReadLine();
 
-                        Console.Write("Въведете допълнителни дестинации (разделени със запетая, или празно): ");
-                        string stopsInput = Console.ReadLine();
-                        List<string> stops = !string.IsNullOrWhiteSpace(stopsInput)
-                            ? stopsInput.Split(',').Select(s => s.Trim()).ToList()
-                            : new List<string>();
+                        Console.Write("Тип услуга (Standard/AllInclusive/Premium): ");
+                        string serviceType = Console.ReadLine();
 
-                        _tripMgr.CreateTrip(dest, startDate, endDate, capacity, price, season, stops);
+                        _tripMgr.CreateTrip(dest, startDate, endDate, capacity, price, season, serviceType);
                         Console.WriteLine("\n✅ Пътуването е добавено успешно!");
                         break;
 
@@ -159,7 +153,7 @@ namespace Travel_Agency_System_2._0.UI
                         {
                             foreach (var t in trips)
                             {
-                                Console.WriteLine($"ID: {t.Id} | Дестинация: {t.MainDestination} | Сезон: {t.Season} | Услуга: {t.ServiceType} | Места: {t.AvailableSeats} | Крайна Цена: {t.Price:F2} евро.");
+                                Console.WriteLine($"ID: {t.Id} | Дестинация: {t.MainDestination} | Сезон: {t.Season} | Услуга: {t.ServiceType} | Места: {t.AvailableSeats} | Крайна Цена: {t.Price:F2} лв.");
                             }
                         }
                         break;
@@ -195,11 +189,11 @@ namespace Travel_Agency_System_2._0.UI
                         Console.Write("Сезон (Low/Mid/High): ");
                         string seasonRule = Console.ReadLine();
                         Console.Write("Тип услуга (Standard/Premium/AllInclusive): ");
-                        string serviceType = Console.ReadLine();
+                        string serviceTypeRule = Console.ReadLine();
                         Console.Write("Коефициент на цената (напр. 1.2 за +20%): ");
                         if (!decimal.TryParse(Console.ReadLine(), out decimal multiplier)) break;
 
-                        _tripMgr.SetPriceRules(tripId, seasonRule, serviceType, multiplier);
+                        _tripMgr.SetPriceRules(tripId, seasonRule, serviceTypeRule, multiplier);
                         Console.WriteLine("✅ Правилото за ценообразуване е запазено!");
                         break;
 
@@ -209,7 +203,7 @@ namespace Travel_Agency_System_2._0.UI
                         Console.Write("ID на пътуване: ");
                         if (!int.TryParse(Console.ReadLine(), out int checkId)) break;
 
-                        int freeSeats = _bookingMgr.GetAvailableSeatsForTrip(checkId);
+                        int freeSeats = _tripMgr.GetAvailableSeats(checkId);
                         Console.WriteLine($"\nСвободни места за пътуването: {freeSeats}");
                         break;
 
@@ -229,6 +223,7 @@ namespace Travel_Agency_System_2._0.UI
                 }
             }
         }
+
         public void HandleBookingMenu()
         {
             Console.Clear();
@@ -244,7 +239,6 @@ namespace Travel_Agency_System_2._0.UI
             switch (choice)
             {
                 case "1":
-                
                     Console.Clear();
                     Console.WriteLine("--- НОВА РЕЗЕРВАЦИЯ ---");
                     Console.Write("ID на клиент: ");
@@ -259,15 +253,15 @@ namespace Travel_Agency_System_2._0.UI
                     string result = _bookingMgr.MakeBooking(cId, tId, count);
                     Console.WriteLine($"\n📢 Резултат: {result}");
                     break;
-                    
 
                 case "2":
-                    Console.Write("ID на пътуване: "); int tripId = int.Parse(Console.ReadLine());
+                    Console.Write("ID на пътуване: ");
+                    int gTripId = int.Parse(Console.ReadLine());
                     Console.Write("Въведете ID-та на клиентите, разделени със запетая (напр. 1,2,3): ");
                     string clientIdsInput = Console.ReadLine();
                     List<int> clientIds = clientIdsInput.Split(',').Select(int.Parse).ToList();
 
-                    string groupRes = _bookingMgr.MakeGroupBooking(clientIds, tripId);
+                    string groupRes = _bookingMgr.MakeGroupBooking(clientIds, gTripId);
                     Console.WriteLine($"\n📢 Резултат: {groupRes}");
                     break;
 
@@ -315,7 +309,6 @@ namespace Travel_Agency_System_2._0.UI
                     string status = _paymentService.ProcessPayment(payId, amount, method);
                     Console.WriteLine($"\n📢 {status}");
                     break;
-                    
             }
         }
 
@@ -339,7 +332,6 @@ namespace Travel_Agency_System_2._0.UI
                     Console.Write("Въведете ID на резервация: ");
                     int bId = int.Parse(Console.ReadLine());
 
-                    
                     Console.WriteLine("\n" + _voucherService.GenerateVoucher(bId));
                     break;
 
@@ -348,7 +340,6 @@ namespace Travel_Agency_System_2._0.UI
                     Console.Write("ID на пътуване: ");
                     int tId = int.Parse(Console.ReadLine());
 
-                    
                     var participants = _reportService.GetParticipantsForTrip(tId);
                     Console.WriteLine($"\n--- СПИСЪК С УЧАСТНИЦИ ЗА ПЪТУВАНЕ #{tId} ---");
                     participants.ForEach(Console.WriteLine);
@@ -361,12 +352,10 @@ namespace Travel_Agency_System_2._0.UI
                     Console.Write("Крайна дата (гггг-мм-дд): ");
                     DateTime end = DateTime.Parse(Console.ReadLine());
 
-                    
                     var upcoming = _reportService.GetUpcomingTrips(start, end);
                     Console.WriteLine("\n--- ПРЕДСТОЯЩИ ПЪТУВАНИЯ ---");
                     foreach (var t in upcoming)
                     {
-                        
                         Console.WriteLine($"- [{t.StartDate.ToShortDateString()}] {t.MainDestination} - Оставаат места: {t.AvailableSeats}");
                     }
                     break;
@@ -378,7 +367,6 @@ namespace Travel_Agency_System_2._0.UI
                     Console.Write("Крайна дата за отчет: ");
                     DateTime reportEnd = DateTime.Parse(Console.ReadLine());
 
-                    
                     decimal revenue = _reportService.GetRevenueReport(reportStart, reportEnd);
                     Console.WriteLine($"\n💰 Общи приходи за периода: {revenue:F2} лв.");
                     break;
@@ -387,7 +375,6 @@ namespace Travel_Agency_System_2._0.UI
                     Console.Clear();
                     Console.WriteLine("\n--- НАЙ-ТЪРСЕНИ ДЕСТИНАЦИИ (ТОП) ---");
 
-                   
                     var stats = _reportService.GetTopDestinations();
                     foreach (var pair in stats)
                     {
@@ -402,7 +389,6 @@ namespace Travel_Agency_System_2._0.UI
                     Console.Write("Минимален брой участници за потвърждение: ");
                     int min = int.Parse(Console.ReadLine());
 
-                    
                     bool confirmed = _tripMgr.ConfirmTripStatus(tripId, min);
 
                     Console.WriteLine();
@@ -417,7 +403,5 @@ namespace Travel_Agency_System_2._0.UI
                     break;
             }
         }
-
-
     }
 }

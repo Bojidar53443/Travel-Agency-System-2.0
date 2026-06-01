@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Travel_Agency_System_2._0.Models;
-using Travel_Agency_System_2._0.Enums; // Добавено, за да вижда BookingStatus
+using Travel_Agency_System_2._0.Enums;
 
 namespace Travel_Agency_System_2._0.sql_connection
 {
