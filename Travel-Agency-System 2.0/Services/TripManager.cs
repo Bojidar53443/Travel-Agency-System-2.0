@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Travel_Agency_System_2._0.Data;
 using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
-using Travel_Agency_System_2._0.Repositories;
 
 namespace Travel_Agency_System_2._0.Services
 {
@@ -21,9 +19,9 @@ namespace Travel_Agency_System_2._0.Services
         {
             return _tripRepo.GetAll();
         }
+
         public void CreateTrip(string destination, DateTime start, DateTime end, int capacity, decimal price)
         {
-            int nextId = DataContext.Trips.Count > 0 ? DataContext.Trips.Max(t => t.Id) + 1 : 1;
             var trip = new Trip
             {
                 MainDestination = destination,
@@ -36,59 +34,54 @@ namespace Travel_Agency_System_2._0.Services
             _tripRepo.Save(trip);
         }
 
-        public List<Trip> GetAllTrips1()
+        public IReadOnlyList<Trip> GetTripsByPeriod(DateTime startDate, DateTime endDate)
         {
-            return DataContext.Trips;
+            return _tripRepo.GetAll()
+                .Where(t => t.StartDate.Date >= startDate.Date && t.EndDate.Date <= endDate.Date)
+                .ToList();
         }
 
         public void DeleteTrip(int id)
         {
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == id);
+            var trip = _tripRepo.GetById(id);
             if (trip != null)
             {
-                DataContext.Trips.Remove(trip);
+                _tripRepo.Delete(trip);
             }
         }
 
         public void AddStopToTrip(int tripId, string stopName)
         {
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+            var trip = _tripRepo.GetById(tripId);
             if (trip != null)
             {
                 trip.AdditionalStops.Add(stopName);
+                _tripRepo.Update(trip);
             }
         }
 
         public int GetAvailableSeats(int tripId)
         {
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+            var trip = _tripRepo.GetById(tripId);
             return trip != null ? trip.AvailableSeats : 0;
         }
+
         public void SetPriceRules(int tripId, string season, string serviceType, decimal multiplier)
         {
-            
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
-
+            var trip = _tripRepo.GetById(tripId);
             if (trip != null)
             {
-                
                 trip.BasePrice *= multiplier;
-
-                
+                _tripRepo.Update(trip);
             }
         }
+
         public bool ConfirmTripStatus(int tripId, int minParticipants)
         {
-            
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+            var trip = _tripRepo.GetById(tripId);
             if (trip == null) return false;
 
-            
-            {
-                return trip.RegisteredClientIds.Count >= minParticipants;
-            }
-
-            return false;
+            return trip.RegisteredClientIds.Count >= minParticipants;
         }
     }
 }
