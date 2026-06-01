@@ -9,5 +9,7 @@ namespace Travel_Agency_System_2._0.Interfaces
         IReadOnlyList<Trip> GetAll();
         void Save(Trip trip);
         void Update(Trip trip);
+
+        void Delete(Trip trip);
     }
 }

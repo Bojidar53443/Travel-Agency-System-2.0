@@ -140,7 +140,7 @@ namespace Travel_Agency_System_2._0.UI
                     case "2": 
                         Console.Clear();
                         Console.WriteLine("--- СПИСЪК С ВСИЧКИ ПЪТУВАНИЯ ---");
-                        var trips = _tripMgr.GetAllTrips1();
+                        var trips = _tripMgr.GetAllTrips();
 
                         if (trips.Count == 0)
                         {

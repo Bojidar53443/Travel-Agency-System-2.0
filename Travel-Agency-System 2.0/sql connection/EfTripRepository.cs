@@ -46,8 +46,16 @@ namespace Travel_Agency_System_2._0.Repositories
         {
             context.Trips.Add(trip);
             context.SaveChanges(); 
-        }
 
+        }
+        public void Delete(Trip trip)
+        {
+            if (trip == null)
+                throw new ArgumentNullException(nameof(trip));
+
+            context.Trips.Remove(trip);
+            context.SaveChanges();
+        }
         public void Update(Trip trip)
         {
             if (trip == null)

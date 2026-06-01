@@ -43,10 +43,15 @@ namespace Travel_Agency_System_2._0.Services
 
         public void DeleteTrip(int id)
         {
-            var trip = _tripRepo.GetById(id);
-            if (trip != null)
+            try
             {
+                var trip = _tripRepo.GetById(id);
                 _tripRepo.Delete(trip);
+                Console.WriteLine("\n✅ Пътуването е изтрито успешно!");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("\n❌ Грешка: Не съществува пътуване с такова ID!");
             }
         }
 
