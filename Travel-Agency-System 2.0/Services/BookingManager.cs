@@ -36,7 +36,7 @@ namespace Travel_Agency_System_2._0.Services
                 Status = BookingStatus.Active
             };
 
-            DataContext.Bookings.Add(booking);
+            _bookingRepo.Save(booking);
 
             for (int i = 0; i < peopleCount; i++)
             {
