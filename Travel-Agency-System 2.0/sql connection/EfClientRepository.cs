@@ -40,7 +40,11 @@ namespace Travel_Agency_System_2._0.Repositories
             context.Clients.Add(client);
             context.SaveChanges();
         }
-
+        public void AddClient(Client client)
+        {
+            context.Clients.Add(client);
+            context.SaveChanges(); 
+        }
         public void Update(Client client)
         {
             if (client == null)

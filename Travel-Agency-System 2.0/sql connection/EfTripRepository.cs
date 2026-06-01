@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
 using Travel_Agency_System_2._0.sql_connection;
@@ -16,6 +17,7 @@ namespace Travel_Agency_System_2._0.Repositories
             this.context = context;
         }
 
+        
         public Trip GetById(int id)
         {
             var trip = context.Trips.FirstOrDefault(t => t.Id == id);
@@ -38,6 +40,12 @@ namespace Travel_Agency_System_2._0.Repositories
 
             context.Trips.Add(trip);
             context.SaveChanges();
+
+        }
+        public void AddTrip(Trip trip)
+        {
+            context.Trips.Add(trip);
+            context.SaveChanges(); 
         }
 
         public void Update(Trip trip)
