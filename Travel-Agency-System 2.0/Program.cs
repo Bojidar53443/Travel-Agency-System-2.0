@@ -11,14 +11,13 @@ namespace Travel_Agency_System_2._0
 
         {
             
+            
             using var context = new TravelAgencyDbContext();
 
-            
             IClientRepository clientRepo = new EfClientRepository(context);
             IBookingRepository bookingRepo = new EfBookingRepository(context);
             ITripRepository tripRepo = new EfTripRepository(context);
 
-            
             ClientManager clientManager = new ClientManager(clientRepo);
             TripManager tripManager = new TripManager(tripRepo);
             BookingManager bookingManager = new BookingManager(bookingRepo);
