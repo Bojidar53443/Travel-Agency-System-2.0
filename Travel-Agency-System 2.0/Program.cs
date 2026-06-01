@@ -1,4 +1,5 @@
-﻿using Travel_Agency_System_2._0.Interfaces;
+﻿using System.Text;
+using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Repositories;
 using Travel_Agency_System_2._0.Services;
 using Travel_Agency_System_2._0.sql_connection;
@@ -10,8 +11,11 @@ namespace Travel_Agency_System_2._0
         static void Main(string[] args)
 
         {
-            
-            
+
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.InputEncoding = Encoding.UTF8;
+
+
             using var context = new TravelAgencyDbContext();
 
             IClientRepository clientRepo = new EfClientRepository(context);
