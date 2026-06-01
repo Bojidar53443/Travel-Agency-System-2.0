@@ -34,7 +34,8 @@ namespace Travel_Agency_System_2._0.Services
                 ClientId = clientId,
                 TripId = tripId,
                 PeopleCount = peopleCount,
-                Status = BookingStatus.Active
+                Status = BookingStatus.Active,
+                BookingDate = DateTime.Now
             };
 
             _bookingRepo.Save(booking);
@@ -61,7 +62,8 @@ namespace Travel_Agency_System_2._0.Services
                     ClientId = clientId,
                     TripId = tripId,
                     PeopleCount = 1,
-                    Status = BookingStatus.Active
+                    Status = BookingStatus.Active,
+                    BookingDate = DateTime.Now 
                 };
 
                 _bookingRepo.Save(booking);

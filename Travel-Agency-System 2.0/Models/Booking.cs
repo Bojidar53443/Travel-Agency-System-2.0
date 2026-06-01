@@ -12,7 +12,7 @@ namespace Travel_Agency_System_2._0.Models
         public int PeopleCount { get; set; }
         public BookingStatus Status { get; set; }
         public decimal FinalPrice { get; set; }
-
+        public DateTime BookingDate { get; set; }
         public Client Client { get; set; }
         public Trip Trip { get; set; }
 
