@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Travel_Agency_System_2._0.sql_connection;
 
@@ -11,9 +12,11 @@ using Travel_Agency_System_2._0.sql_connection;
 namespace Travel_Agency_System_2._0.Migrations
 {
     [DbContext(typeof(TravelAgencyDbContext))]
-    partial class TravelAgencyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260601180421_AddTripExtraDetails")]
+    partial class AddTripExtraDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,9 +137,6 @@ namespace Travel_Agency_System_2._0.Migrations
                     b.Property<string>("AdditionalStops")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("AvailableSeats")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("BasePrice")
                         .HasColumnType("decimal(18,2)");

@@ -20,7 +20,7 @@ namespace Travel_Agency_System_2._0.Services
             return _tripRepo.GetAll();
         }
 
-        public void CreateTrip(string destination, DateTime start, DateTime end, int capacity, decimal price)
+        public void CreateTrip(string destination, DateTime start, DateTime end, int capacity, decimal price, string season, List<string> stops)
         {
             var trip = new Trip
             {
@@ -28,10 +28,28 @@ namespace Travel_Agency_System_2._0.Services
                 StartDate = start,
                 EndDate = end,
                 MaxCapacity = capacity,
-                BasePrice = price
+                AvailableSeats = capacity,
+                BasePrice = price,
+                Price = price, 
+                Season = season,
+                ServiceType = "Standard",
+                AdditionalStops = stops
             };
 
             _tripRepo.Save(trip);
+        }
+
+        public void SetPriceRules(int tripId, string season, string serviceType, decimal multiplier)
+        {
+            var trip = _tripRepo.GetById(tripId);
+            if (trip != null)
+            {
+                trip.Season = season;
+                trip.ServiceType = serviceType; 
+                trip.Price = trip.BasePrice * multiplier; 
+
+                _tripRepo.Update(trip);
+            }
         }
 
         public IReadOnlyList<Trip> GetTripsByPeriod(DateTime startDate, DateTime endDate)
@@ -71,15 +89,7 @@ namespace Travel_Agency_System_2._0.Services
             return trip != null ? trip.AvailableSeats : 0;
         }
 
-        public void SetPriceRules(int tripId, string season, string serviceType, decimal multiplier)
-        {
-            var trip = _tripRepo.GetById(tripId);
-            if (trip != null)
-            {
-                trip.BasePrice *= multiplier;
-                _tripRepo.Update(trip);
-            }
-        }
+       
 
         public bool ConfirmTripStatus(int tripId, int minParticipants)
         {

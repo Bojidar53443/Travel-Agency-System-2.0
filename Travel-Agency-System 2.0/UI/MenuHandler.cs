@@ -100,7 +100,7 @@ namespace Travel_Agency_System_2._0.UI
             {
                 Console.Clear();
                 Console.WriteLine("=== УПРАВЛЕНИЕ НА ПЪТУВАНИЯ ===");
-                Console.WriteLine("1. Добави ново пътуване");
+                Console.WriteLine("1. Добави нов пътуване");
                 Console.WriteLine("2. Прегледай всички пътувания");
                 Console.WriteLine("3. Изтрий пътуване");
                 Console.WriteLine("4. Добави допълнителни дестинации / спирки");
@@ -114,7 +114,7 @@ namespace Travel_Agency_System_2._0.UI
 
                 switch (tripChoice)
                 {
-                    case "1": 
+                    case "1":
                         Console.Clear();
                         Console.WriteLine("--- ДОБАВЯНЕ НА ПЪТУВАНЕ ---");
 
@@ -133,11 +133,20 @@ namespace Travel_Agency_System_2._0.UI
                         Console.Write("Базова цена: ");
                         if (!decimal.TryParse(Console.ReadLine(), out decimal price)) break;
 
-                        _tripMgr.CreateTrip(dest, startDate, endDate, capacity, price);
+                        Console.Write("Сезон (Low/Mid/High или Лято/Зима): ");
+                        string season = Console.ReadLine();
+
+                        Console.Write("Въведете допълнителни дестинации (разделени със запетая, или празно): ");
+                        string stopsInput = Console.ReadLine();
+                        List<string> stops = !string.IsNullOrWhiteSpace(stopsInput)
+                            ? stopsInput.Split(',').Select(s => s.Trim()).ToList()
+                            : new List<string>();
+
+                        _tripMgr.CreateTrip(dest, startDate, endDate, capacity, price, season, stops);
                         Console.WriteLine("\n✅ Пътуването е добавено успешно!");
                         break;
 
-                    case "2": 
+                    case "2":
                         Console.Clear();
                         Console.WriteLine("--- СПИСЪК С ВСИЧКИ ПЪТУВАНИЯ ---");
                         var trips = _tripMgr.GetAllTrips();
@@ -150,12 +159,12 @@ namespace Travel_Agency_System_2._0.UI
                         {
                             foreach (var t in trips)
                             {
-                                Console.WriteLine($"ID: {t.Id} | Дестинация: {t.MainDestination} | Дата: {t.StartDate.ToShortDateString()} | Места: {t.MaxCapacity} | Цена: {t.BasePrice:F2} лв.");
+                                Console.WriteLine($"ID: {t.Id} | Дестинация: {t.MainDestination} | Сезон: {t.Season} | Услуга: {t.ServiceType} | Места: {t.AvailableSeats} | Крайна Цена: {t.Price:F2} евро.");
                             }
                         }
                         break;
 
-                    case "3": 
+                    case "3":
                         Console.Clear();
                         Console.WriteLine("--- ИЗТРИВАНЕ НА ПЪТУВАНЕ ---");
                         Console.Write("Въведете ID на пътуването: ");
@@ -166,7 +175,7 @@ namespace Travel_Agency_System_2._0.UI
                         }
                         break;
 
-                    case "4": 
+                    case "4":
                         Console.Clear();
                         Console.WriteLine("--- ДОБАВЯНЕ НА СПИРКА КЪМ ПЪТУВАНЕ ---");
                         Console.Write("ID на пътуване: ");
@@ -178,23 +187,23 @@ namespace Travel_Agency_System_2._0.UI
                         Console.WriteLine("✅ Спирката е добавена успешно!");
                         break;
 
-                    case "5": // НОВАТА ОПЦИЯ ЗА СЕЗОННА ЦЕНА
+                    case "5":
                         Console.Clear();
                         Console.WriteLine("--- ДЕФИНИРАНЕ НА ПРАВИЛА ЗА ЦЕНА ---");
                         Console.Write("ID на пътуване: ");
                         if (!int.TryParse(Console.ReadLine(), out int tripId)) break;
                         Console.Write("Сезон (Low/Mid/High): ");
-                        string season = Console.ReadLine();
+                        string seasonRule = Console.ReadLine();
                         Console.Write("Тип услуга (Standard/Premium/AllInclusive): ");
                         string serviceType = Console.ReadLine();
                         Console.Write("Коефициент на цената (напр. 1.2 за +20%): ");
                         if (!decimal.TryParse(Console.ReadLine(), out decimal multiplier)) break;
 
-                        _tripMgr.SetPriceRules(tripId, season, serviceType, multiplier);
+                        _tripMgr.SetPriceRules(tripId, seasonRule, serviceType, multiplier);
                         Console.WriteLine("✅ Правилото за ценообразуване е запазено!");
                         break;
 
-                    case "6": 
+                    case "6":
                         Console.Clear();
                         Console.WriteLine("--- ПРОВЕРКА ЗА СВОБОДНИ МЕСТА ---");
                         Console.Write("ID на пътуване: ");

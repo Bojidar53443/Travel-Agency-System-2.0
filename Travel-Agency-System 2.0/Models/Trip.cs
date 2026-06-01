@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Travel_Agency_System_2._0.Models
 {
@@ -14,14 +11,15 @@ namespace Travel_Agency_System_2._0.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int MaxCapacity { get; set; }
+        public int AvailableSeats { get; set; }
         public decimal BasePrice { get; set; }
         public List<int> RegisteredClientIds { get; set; } = new List<int>();
 
-      
+
         public string Season { get; set; }
-        public int AvailableSeats => MaxCapacity - RegisteredClientIds.Count;
+        public string ServiceType { get; set; } 
+        public decimal Price { get; set; } 
+
         public List<Booking> Bookings { get; set; } = new List<Booking>();
-        public decimal Price { get; set; }
-       
     }
 }
