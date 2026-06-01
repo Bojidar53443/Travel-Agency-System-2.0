@@ -17,7 +17,8 @@ namespace Travel_Agency_System_2._0.Models
         public decimal BasePrice { get; set; }
         public List<int> RegisteredClientIds { get; set; } = new List<int>();
 
-
+      
+        public string Season { get; set; }
         public int AvailableSeats => MaxCapacity - RegisteredClientIds.Count;
         public List<Booking> Bookings { get; set; } = new List<Booking>();
         public decimal Price { get; set; }
