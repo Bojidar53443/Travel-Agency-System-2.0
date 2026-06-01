@@ -46,34 +46,31 @@ namespace Travel_Agency_System_2._0.Services
         }
         public string MakeGroupBooking(List<int> clientIds, int tripId)
         {
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+            var trip = _tripRepo.GetById(tripId);
             if (trip == null) return "Пътуването не е намерено.";
 
             int peopleCount = clientIds.Count;
+
             if (trip.AvailableSeats < peopleCount)
-                return $"Няма достатъчно места за цялата група! Свободни: {trip.AvailableSeats}";
+                return $"Няма достатъчно места за групата! Свободни: {trip.AvailableSeats}";
 
-            
-            var booking = new Booking
+            foreach (var clientId in clientIds)
             {
-                Id = DataContext.Bookings.Count + 1,
-                ClientId = clientIds.First(),
-                TripId = tripId,
-                PeopleCount = peopleCount,
-                Status = BookingStatus.Active
-            };
+                var booking = new Booking
+                {
+                    ClientId = clientId,
+                    TripId = tripId,
+                    PeopleCount = 1,
+                    Status = BookingStatus.Active
+                };
 
-            
-
-            DataContext.Bookings.Add(booking);
-
-            
-            foreach (var id in clientIds)
-            {
-                trip.RegisteredClientIds.Add(id);
+                _bookingRepo.Save(booking);
             }
 
-            return $"Груповата резервация е успешна! Генерирано ID: {booking.Id}";
+            trip.MaxCapacity -= peopleCount;
+            _tripRepo.Update(trip);
+
+            return "Груповата резервация е успешна!";
         }
 
 
