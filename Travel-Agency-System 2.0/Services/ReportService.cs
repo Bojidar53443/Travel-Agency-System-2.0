@@ -1,24 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Travel_Agency_System_2._0.Data;
+using Microsoft.EntityFrameworkCore;
 using Travel_Agency_System_2._0.Enums;
 using Travel_Agency_System_2._0.Models;
+using Travel_Agency_System_2._0.sql_connection;
 
 namespace Travel_Agency_System_2._0.Services
 {
     internal class ReportService
     {
-        
+        private readonly TravelAgencyDbContext _context;
+
+        public ReportService()
+        {
+            _context = new TravelAgencyDbContext();
+        }
+
         public List<string> GetParticipantsForTrip(int tripId)
         {
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+            var trip = _context.Trips.FirstOrDefault(t => t.Id == tripId);
             if (trip == null) return new List<string> { "Пътуването не е намерено." };
 
-            
-            var participants = DataContext.Clients
+            var participants = _context.Clients
                 .Where(c => trip.RegisteredClientIds.Contains(c.Id))
-                .Select(c => $"- ID: {c.Id} | {c.Name} ({c.EmailAddress})")
+                .Select(c => $"- ID: {c.Id} | {c.Name} {c.Surname} ({c.EmailAddress})")
                 .ToList();
 
             if (!participants.Any())
@@ -31,33 +37,40 @@ namespace Travel_Agency_System_2._0.Services
 
         public List<Trip> GetUpcomingTrips(DateTime start, DateTime end)
         {
-            return DataContext.Trips
-                .Where(t => t.StartDate >= start && t.StartDate <= end)
+            return _context.Trips
+                .Where(t => t.StartDate.Date >= start.Date && t.StartDate.Date <= end.Date)
                 .ToList();
         }
 
         public decimal GetRevenueReport(DateTime start, DateTime end)
         {
-            return DataContext.Bookings
-                .Where(b => b.Status != BookingStatus.Canceled)
-                .Sum(b => {
-                    var trip = DataContext.Trips.FirstOrDefault(t => t.Id == b.TripId);
-                    if (trip != null && trip.StartDate >= start && trip.StartDate <= end)
-                    {
-                        decimal basePrice = trip.BasePrice * b.PeopleCount;
-                        decimal extraPrice = b.ExtraServices != null ? b.ExtraServices.Sum(s => s.Price) : 0;
-                        return basePrice + extraPrice;
-                    }
-                    return 0;
-                });
+            var bookingsInPeriod = _context.Bookings
+                .Include(b => b.Trip)
+                .Include(b => b.ExtraServices)
+                .Where(b => b.Status != BookingStatus.Canceled &&
+                            b.Trip.StartDate.Date >= start.Date &&
+                            b.Trip.StartDate.Date <= end.Date)
+                .ToList();
+
+            decimal totalRevenue = 0;
+
+            foreach (var b in bookingsInPeriod)
+            {
+                decimal basePrice = b.Trip.BasePrice * b.PeopleCount;
+                decimal extraPrice = b.ExtraServices != null ? b.ExtraServices.Sum(s => s.Price) : 0;
+                totalRevenue += (basePrice + extraPrice);
+            }
+
+            return totalRevenue;
         }
 
         public Dictionary<string, int> GetTopDestinations()
         {
-            return DataContext.Bookings
-                .Where(b => b.Status != BookingStatus.Canceled)
-                .GroupBy(b => DataContext.Trips.FirstOrDefault(t => t.Id == b.TripId)?.MainDestination)
-                .Where(g => g.Key != null)
+            return _context.Bookings
+                .Include(b => b.Trip)
+                .Where(b => b.Status != BookingStatus.Canceled && b.Trip != null)
+                .AsEnumerable()
+                .GroupBy(b => b.Trip.MainDestination)
                 .ToDictionary(g => g.Key, g => g.Sum(b => b.PeopleCount))
                 .OrderByDescending(p => p.Value)
                 .ToDictionary(p => p.Key, p => p.Value);

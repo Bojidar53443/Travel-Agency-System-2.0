@@ -23,6 +23,7 @@ namespace Travel_Agency_System_2._0.sql_connection
         public DbSet<Trip> Trips { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<ExtraService> ExtraServices { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -78,6 +79,10 @@ namespace Travel_Agency_System_2._0.sql_connection
             modelBuilder.Entity<Client>()
                 .HasIndex(c => c.EmailAddress)
                 .IsUnique();
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasColumnType("decimal(18,2)");
         }
     }
 }

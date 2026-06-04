@@ -1,56 +1,69 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Travel_Agency_System_2._0.Data;
-using Travel_Agency_System_2._0.Models;
 using Travel_Agency_System_2._0.Enums;
+using Travel_Agency_System_2._0.Interfaces;
+using Travel_Agency_System_2._0.Models;
+using Travel_Agency_System_2._0.Repositories; 
+using Travel_Agency_System_2._0.sql_connection;
+
 namespace Travel_Agency_System_2._0.Services
 {
     internal class PaymentService
     {
-        public string ProcessPayment(int bookingId, decimal amount, string method)
+        private readonly TravelAgencyDbContext _context;
+        private readonly IBookingRepository _bookingRepo;
+
+        public PaymentService()
         {
-
-            var booking = DataContext.Bookings.FirstOrDefault(b => b.Id == bookingId);
-            if (booking == null) return "Грешка: Резервацията не е  намерена.";
-
-
-            if (amount < booking.FinalPrice)
-            {
-                return $"Грешка: Сумата е недостатъчна. Дължима сума: {booking.FinalPrice} лв.";
-            }
-
-
-            var payment = new Payment
-            {
-                Id = DataContext.Payments.Count + 1,
-                BookingId = bookingId,
-                Amount = amount,
-                Date = DateTime.Now,
-                PaymentMethod = method
-            };
-
-            DataContext.Payments.Add(payment);
-
-
-            booking.Status = BookingStatus.Active;
-
-            return $"Плащането на стойност {amount} лв. бе успешно регистрирано за Резервация #{bookingId}.";
+            _context = new TravelAgencyDbContext();
+            _bookingRepo = new EfBookingRepository(_context);
         }
 
+        public string ProcessPayment(int bookingId, decimal amount, string method)
+        {
+            try
+            {
+                var booking = _bookingRepo.GetById(bookingId);
+                if (booking == null) return "Грешка: Резервацията не е намерена.";
+
+                var payment = new Payment
+                {
+                    BookingId = bookingId,
+                    Amount = amount,
+                    PaymentMethod = method
+                };
+
+                _context.Payments.Add(payment);
+                _context.SaveChanges();
+
+                booking.Status = BookingStatus.Active;
+                _bookingRepo.Update(booking);
+
+                return $"Плащането на стойност {amount} лв. бе успешно регистрирано за Резервация #{bookingId}.";
+            }
+            catch (Exception)
+            {
+                return "Грешка при обработка на плащането.";
+            }
+        }
 
         public decimal GetRemainingBalance(int bookingId)
         {
-            var booking = DataContext.Bookings.FirstOrDefault(b => b.Id == bookingId);
-            if (booking == null) return 0;
+            try
+            {
+                var booking = _bookingRepo.GetById(bookingId);
+                if (booking == null) return 0;
 
-            decimal paidAmount = DataContext.Payments
-                .Where(p => p.BookingId == bookingId)
-                .Sum(p => p.Amount);
+                decimal paidAmount = _context.Payments
+                    .Where(p => p.BookingId == bookingId)
+                    .Sum(p => p.Amount);
 
-            return booking.FinalPrice - paidAmount;
+                return (booking.PeopleCount * 100) - paidAmount;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
         }
     }
 }

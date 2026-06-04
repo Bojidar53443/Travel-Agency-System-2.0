@@ -52,12 +52,7 @@ namespace Travel_Agency_System_2._0.Services
             }
         }
 
-        public IReadOnlyList<Trip> GetTripsByPeriod(DateTime startDate, DateTime endDate)
-        {
-            return _tripRepo.GetAll()
-                .Where(t => t.StartDate.Date >= startDate.Date && t.EndDate.Date <= endDate.Date)
-                .ToList();
-        }
+       
 
         public void DeleteTrip(int id)
         {
@@ -95,6 +90,14 @@ namespace Travel_Agency_System_2._0.Services
             var trip = _tripRepo.GetById(tripId);
             return trip != null ? trip.AvailableSeats : 0;
         }
+
+        public IReadOnlyList<Trip> GetTripsByPeriod(DateTime startDate, DateTime endDate)
+        {
+            return _tripRepo.GetAll()
+                .Where(t => t.StartDate.Date >= startDate.Date && t.EndDate.Date <= endDate.Date)
+                .ToList();
+        }
+
 
         public bool ConfirmTripStatus(int tripId, int minParticipants)
         {

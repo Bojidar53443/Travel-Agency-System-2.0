@@ -199,12 +199,63 @@ namespace Travel_Agency_System_2._0.UI
 
                     case "6":
                         Console.Clear();
-                        Console.WriteLine("--- ПРОВЕРКА ЗА СВОБОДНИ МЕСТА ---");
-                        Console.Write("ID на пътуване: ");
-                        if (!int.TryParse(Console.ReadLine(), out int checkId)) break;
+                        Console.WriteLine("=== ПРОВЕРКА ЗА СВОБОДНИ МЕСТА ===");
+                        Console.WriteLine("1. Проверка за конкретно пътуване (по ID)");
+                        Console.WriteLine("2. Проверка за пътувания в определен период");
+                        Console.Write("Избор: ");
+                        string checkChoice = Console.ReadLine();
 
-                        int freeSeats = _tripMgr.GetAvailableSeats(checkId);
-                        Console.WriteLine($"\nСвободни места за пътуването: {freeSeats}");
+                        if (checkChoice == "1")
+                        {
+                            Console.Clear();
+                            Console.WriteLine("--- СВОБОДНИ МЕСТА ЗА КОНКРЕТНО ПЪТУВАНЕ ---");
+                            Console.Write("Въведете ID на пътуване: ");
+                            if (!int.TryParse(Console.ReadLine(), out int checkId)) break;
+
+                            int freeSeats = _tripMgr.GetAvailableSeats(checkId);
+                            var trip = _tripMgr.GetAllTrips().FirstOrDefault(t => t.Id == checkId);
+
+                            if (trip != null)
+                            {
+                                Console.WriteLine($"\n📍 Дестинация: {trip.MainDestination}");
+                                Console.WriteLine($"⏳ Период: {trip.StartDate.ToShortDateString()} - {trip.EndDate.ToShortDateString()}");
+                                Console.WriteLine($"💺 Свободни места: {freeSeats} от общо {trip.MaxCapacity}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("\n❌ Пътуване с такова ID не съществува в базата данни.");
+                            }
+                        }
+                        else if (checkChoice == "2")
+                        {
+                            Console.Clear();
+                            Console.WriteLine("--- СВОБОДНИ МЕСТА ЗА ПЕРИОД ---");
+
+                            Console.Write("Начална дата (гггг-мм-дд): ");
+                            if (!DateTime.TryParse(Console.ReadLine(), out DateTime startD)) break;
+
+                            Console.Write("Крайна дата (гггг-мм-дд): ");
+                            if (!DateTime.TryParse(Console.ReadLine(), out DateTime endD)) break;
+
+                            var periodTrips = _tripMgr.GetTripsByPeriod(startD, endD);
+
+                            Console.WriteLine($"\n--- ПЪТУВАНИЯ В ПЕРИОДА {startD.ToShortDateString()} - {endD.ToShortDateString()} ---");
+                            if (!periodTrips.Any())
+                            {
+                                Console.WriteLine("Няма намерени пътувания в този период.");
+                            }
+                            else
+                            {
+                                foreach (var t in periodTrips)
+                                {
+                                    Console.WriteLine($"- ID: {t.Id} | {t.MainDestination} | Дата: {t.StartDate.ToShortDateString()} | Свободни места: {t.AvailableSeats}/{t.MaxCapacity}");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("❌ Невалиден избор!");
+                        }
                         break;
 
                     case "0":

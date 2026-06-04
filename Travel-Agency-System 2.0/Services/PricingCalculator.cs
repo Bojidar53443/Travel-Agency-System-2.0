@@ -1,33 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Travel_Agency_System_2._0.Data;
 using Travel_Agency_System_2._0.Enums;
+using Travel_Agency_System_2._0.Interfaces;
+using Travel_Agency_System_2._0.Models;
+
 namespace Travel_Agency_System_2._0.Services
 {
     internal class PricingCalculator
     {
+        private readonly ITripRepository _tripRepo;
+
+        public PricingCalculator(ITripRepository tripRepo)
+        {
+            _tripRepo = tripRepo;
+        }
+
         public decimal CalculateTotalPrice(int tripId, Season season, ServiceType serviceType, int peopleCount, bool hasInsurance)
         {
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
+            var trip = _tripRepo.GetById(tripId);
             if (trip == null) return 0;
 
             decimal currentPrice = trip.BasePrice;
 
-
             currentPrice *= GetSeasonMultiplier(season);
 
-
             currentPrice += GetServiceExtraCost(serviceType);
-
 
             if (hasInsurance)
             {
                 currentPrice += 50.00m;
             }
-
 
             return currentPrice * peopleCount;
         }

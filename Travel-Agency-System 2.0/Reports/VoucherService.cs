@@ -3,24 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Travel_Agency_System_2._0.Data;
+using Travel_Agency_System_2._0.Models;
+using Travel_Agency_System_2._0.sql_connection;
 
 namespace Travel_Agency_System_2._0.Reports
 {
     internal class VoucherService
     {
+        private readonly TravelAgencyDbContext _context;
+
+        public VoucherService()
+        {
+            _context = new TravelAgencyDbContext();
+        }
+
         public string GenerateVoucher(int bookingId)
         {
-
-            var booking = DataContext.Bookings.FirstOrDefault(b => b.Id == bookingId);
+            var booking = _context.Bookings.FirstOrDefault(b => b.Id == bookingId);
             if (booking == null) return "Грешка: Резервацията не е намерена!";
 
-
-            var client = DataContext.Clients.FirstOrDefault(c => c.Id == booking.ClientId);
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == booking.TripId);
+            var client = _context.Clients.FirstOrDefault(c => c.Id == booking.ClientId);
+            var trip = _context.Trips.FirstOrDefault(t => t.Id == booking.TripId);
 
             if (client == null || trip == null) return "Грешка: Непълни данни за ваучера!";
-
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("**************************************************");
@@ -36,7 +41,7 @@ namespace Travel_Agency_System_2._0.Reports
             sb.AppendLine($" ПЕРИОД: {trip.StartDate:dd/MM/yyyy} - {trip.EndDate:dd/MM/yyyy}");
             sb.AppendLine($" БРОЙ УЧАСТНИЦИ: {booking.PeopleCount}");
 
-            if (trip.AdditionalStops.Any())
+            if (trip.AdditionalStops != null && trip.AdditionalStops.Any())
             {
                 sb.AppendLine($" МАРШРУТ: {string.Join(" -> ", trip.AdditionalStops)}");
             }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Travel_Agency_System_2._0.Data;
 using Travel_Agency_System_2._0.Enums;
 using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
@@ -17,8 +14,8 @@ namespace Travel_Agency_System_2._0.Services
 
         public BookingManager(IBookingRepository bookingRepo, ITripRepository tripRepo)
         {
-            _bookingRepo = bookingRepo;
-            _tripRepo = tripRepo;
+            _bookingRepo = bookingRepo ?? throw new ArgumentNullException(nameof(bookingRepo));
+            _tripRepo = tripRepo ?? throw new ArgumentNullException(nameof(tripRepo));
         }
 
         public string MakeBooking(int clientId, int tripId, int peopleCount)
@@ -35,7 +32,7 @@ namespace Travel_Agency_System_2._0.Services
                 TripId = tripId,
                 PeopleCount = peopleCount,
                 Status = BookingStatus.Active,
-                BookingDate = DateTime.Now
+                
             };
 
             _bookingRepo.Save(booking);
@@ -64,7 +61,6 @@ namespace Travel_Agency_System_2._0.Services
                     TripId = tripId,
                     PeopleCount = 1,
                     Status = BookingStatus.Active,
-                    BookingDate = DateTime.Now
                 };
 
                 _bookingRepo.Save(booking);
@@ -78,7 +74,7 @@ namespace Travel_Agency_System_2._0.Services
 
         public string AddExtraServiceToBooking(int bookingId, string serviceName, decimal price, string description = "")
         {
-            var booking = DataContext.Bookings.FirstOrDefault(b => b.Id == bookingId);
+            var booking = _bookingRepo.GetById(bookingId);
             if (booking == null) return "Резервацията не е намерена.";
 
             if (booking.Status == BookingStatus.Canceled)
@@ -100,15 +96,16 @@ namespace Travel_Agency_System_2._0.Services
                 RelatedTripId = booking.TripId
             });
 
+            _bookingRepo.Update(booking);
             return $"Успешно добавена услуга: {serviceName} ({price:F2} лв.)";
         }
 
         public decimal CalculateTotalAmount(int bookingId)
         {
-            var booking = DataContext.Bookings.FirstOrDefault(b => b.Id == bookingId);
+            var booking = _bookingRepo.GetById(bookingId);
             if (booking == null) return 0;
 
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == booking.TripId);
+            var trip = _tripRepo.GetById(booking.TripId);
             if (trip == null) return 0;
 
             decimal totalAmount = trip.BasePrice * booking.PeopleCount;
@@ -123,13 +120,13 @@ namespace Travel_Agency_System_2._0.Services
 
         public string CancelBooking(int bookingId)
         {
-            var booking = DataContext.Bookings.FirstOrDefault(b => b.Id == bookingId);
+            var booking = _bookingRepo.GetById(bookingId);
             if (booking == null) return "Резервацията не е намерена.";
 
             if (booking.Status == BookingStatus.Canceled)
                 return "Резервацията вече е анулирана.";
 
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == booking.TripId);
+            var trip = _tripRepo.GetById(booking.TripId);
             if (trip == null) return "Пътуването не е намерено.";
 
             booking.Status = BookingStatus.Canceled;
@@ -143,6 +140,7 @@ namespace Travel_Agency_System_2._0.Services
             }
 
             decimal totalCost = CalculateTotalAmount(bookingId);
+            _bookingRepo.Update(booking);
 
             if ((trip.StartDate - DateTime.Now).TotalDays < 7)
             {
@@ -155,14 +153,14 @@ namespace Travel_Agency_System_2._0.Services
 
         public bool UpdateBookingStatus(int bookingId, BookingStatus newStatus)
         {
-            var booking = DataContext.Bookings.FirstOrDefault(b => b.Id == bookingId);
+            var booking = _bookingRepo.GetById(bookingId);
             if (booking == null) return false;
 
             booking.Status = newStatus;
 
             if (newStatus == BookingStatus.Canceled)
             {
-                var trip = DataContext.Trips.FirstOrDefault(t => t.Id == booking.TripId);
+                var trip = _tripRepo.GetById(booking.TripId);
                 if (trip != null && trip.RegisteredClientIds != null)
                 {
                     for (int i = 0; i < booking.PeopleCount; i++)
@@ -172,28 +170,27 @@ namespace Travel_Agency_System_2._0.Services
                 }
             }
 
+            _bookingRepo.Update(booking);
             return true;
         }
 
         public List<Trip> GetClientTripHistory(int clientId)
         {
-            var tripIds = DataContext.Bookings
+            var tripIds = _bookingRepo.GetAll()
                 .Where(b => b.ClientId == clientId && b.Status != BookingStatus.Canceled)
                 .Select(b => b.TripId)
                 .Distinct()
                 .ToList();
 
-            return DataContext.Trips
+            return _tripRepo.GetAll()
                 .Where(t => tripIds.Contains(t.Id))
                 .ToList();
         }
 
         public int GetAvailableSeatsForTrip(int tripId)
         {
-            var trip = DataContext.Trips.FirstOrDefault(t => t.Id == tripId);
-            if (trip == null) return 0;
-
-            return trip.AvailableSeats;
+            var trip = _tripRepo.GetById(tripId);
+            return trip != null ? trip.AvailableSeats : 0;
         }
     }
 }
