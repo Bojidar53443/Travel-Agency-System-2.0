@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Travel_Agency_System_2._0.Enums;
 using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
+using Travel_Agency_System_2._0.sql_connection;
 
 namespace Travel_Agency_System_2._0.Services
 {
@@ -11,11 +13,13 @@ namespace Travel_Agency_System_2._0.Services
     {
         private readonly IBookingRepository _bookingRepo;
         private readonly ITripRepository _tripRepo;
+        private readonly TravelAgencyDbContext _context;
 
         public BookingManager(IBookingRepository bookingRepo, ITripRepository tripRepo)
         {
-            _bookingRepo = bookingRepo ?? throw new ArgumentNullException(nameof(bookingRepo));
-            _tripRepo = tripRepo ?? throw new ArgumentNullException(nameof(tripRepo));
+            _bookingRepo = bookingRepo;
+            _tripRepo = tripRepo;
+            _context = new TravelAgencyDbContext();
         }
 
         public string MakeBooking(int clientId, int tripId, int peopleCount)
@@ -31,8 +35,7 @@ namespace Travel_Agency_System_2._0.Services
                 ClientId = clientId,
                 TripId = tripId,
                 PeopleCount = peopleCount,
-                Status = BookingStatus.Active,
-                
+                Status = BookingStatus.Active
             };
 
             _bookingRepo.Save(booking);
@@ -40,7 +43,7 @@ namespace Travel_Agency_System_2._0.Services
             trip.AvailableSeats -= peopleCount;
             _tripRepo.Update(trip);
 
-            return "Резервацията е успешна!";
+            return $"Резервацията беше създадена успешно с ID: {booking.Id}";
         }
 
         public string MakeGroupBooking(List<int> clientIds, int tripId)
@@ -48,9 +51,7 @@ namespace Travel_Agency_System_2._0.Services
             var trip = _tripRepo.GetById(tripId);
             if (trip == null) return "Пътуването не е намерено.";
 
-            int peopleCount = clientIds.Count;
-
-            if (trip.AvailableSeats < peopleCount)
+            if (trip.AvailableSeats < clientIds.Count)
                 return $"Няма достатъчно места за групата! Свободни: {trip.AvailableSeats}";
 
             foreach (var clientId in clientIds)
@@ -60,62 +61,47 @@ namespace Travel_Agency_System_2._0.Services
                     ClientId = clientId,
                     TripId = tripId,
                     PeopleCount = 1,
-                    Status = BookingStatus.Active,
+                    Status = BookingStatus.Active
                 };
-
                 _bookingRepo.Save(booking);
             }
 
-            trip.AvailableSeats -= peopleCount;
+            trip.AvailableSeats -= clientIds.Count;
             _tripRepo.Update(trip);
 
-            return "Груповата резервация е успешна!";
+            return $"Успешно бяха създадени {clientIds.Count} резервации за групата!";
         }
 
-        public string AddExtraServiceToBooking(int bookingId, string serviceName, decimal price, string description = "")
+        public string AddExtraServiceToBooking(int bookingId, string serviceName, decimal price)
+        {
+            var booking = _context.Bookings
+                .Include(b => b.ExtraServices)
+                .FirstOrDefault(b => b.Id == bookingId);
+
+            if (booking == null) return "Грешка: Резервацията не е намерена!";
+
+            var newService = new ExtraService
+            {
+                Name = serviceName,
+                Price = price,
+                Description = "Допълнителна услуга"
+            }; ;
+
+            booking.ExtraServices.Add(newService);
+            _context.SaveChanges();
+
+            return $"Успешно добавихте услуга '{serviceName}' на стойност {price} лв. към Резервация #{bookingId}!";
+        }
+
+        public string UpdateBookingStatus(int bookingId, BookingStatus newStatus)
         {
             var booking = _bookingRepo.GetById(bookingId);
             if (booking == null) return "Резервацията не е намерена.";
 
-            if (booking.Status == BookingStatus.Canceled)
-                return "Не може да добавяте услуги към анулирана резервация.";
-
-            if (booking.ExtraServices == null)
-            {
-                booking.ExtraServices = new List<ExtraService>();
-            }
-
-            int nextId = booking.ExtraServices.Count + 1;
-
-            booking.ExtraServices.Add(new ExtraService
-            {
-                Id = nextId,
-                Name = serviceName,
-                Price = price,
-                Description = description,
-                RelatedTripId = booking.TripId
-            });
-
+            booking.Status = newStatus;
             _bookingRepo.Update(booking);
-            return $"Успешно добавена услуга: {serviceName} ({price:F2} лв.)";
-        }
 
-        public decimal CalculateTotalAmount(int bookingId)
-        {
-            var booking = _bookingRepo.GetById(bookingId);
-            if (booking == null) return 0;
-
-            var trip = _tripRepo.GetById(booking.TripId);
-            if (trip == null) return 0;
-
-            decimal totalAmount = trip.BasePrice * booking.PeopleCount;
-
-            if (booking.ExtraServices != null)
-            {
-                totalAmount += booking.ExtraServices.Sum(s => s.Price);
-            }
-
-            return totalAmount;
+            return $"Статусът на резервация #{bookingId} беше променен на {newStatus}.";
         }
 
         public string CancelBooking(int bookingId)
@@ -126,71 +112,39 @@ namespace Travel_Agency_System_2._0.Services
             if (booking.Status == BookingStatus.Canceled)
                 return "Резервацията вече е анулирана.";
 
-            var trip = _tripRepo.GetById(booking.TripId);
-            if (trip == null) return "Пътуването не е намерено.";
-
             booking.Status = BookingStatus.Canceled;
-
-            if (trip.RegisteredClientIds != null)
-            {
-                for (int i = 0; i < booking.PeopleCount; i++)
-                {
-                    trip.RegisteredClientIds.Remove(booking.ClientId);
-                }
-            }
-
-            decimal totalCost = CalculateTotalAmount(bookingId);
             _bookingRepo.Update(booking);
 
-            if ((trip.StartDate - DateTime.Now).TotalDays < 7)
+            var trip = _tripRepo.GetById(booking.TripId);
+            if (trip != null)
             {
-                decimal penalty = totalCost * 0.20m;
-                return $"Резервацията е анулирана с 20% неустойка. Дължима глоба: {penalty:F2} лв.";
+                trip.AvailableSeats += booking.PeopleCount;
+                _tripRepo.Update(trip);
             }
 
-            return "Резервацията е анулирана успешно без неустойка.";
+            return $"Резервация #{bookingId} беше анулирана успешно.";
         }
 
-        public bool UpdateBookingStatus(int bookingId, BookingStatus newStatus)
+        public List<Booking> GetClientTripHistory(int clientId)
         {
-            var booking = _bookingRepo.GetById(bookingId);
-            if (booking == null) return false;
-
-            booking.Status = newStatus;
-
-            if (newStatus == BookingStatus.Canceled)
+            return _context.Bookings
+                .Include(b => b.Trip)
+                .Include(b => b.ExtraServices)
+                .Where(b => b.ClientId == clientId)
+                .ToList();
+        }
+        public List<Client> GetClientsByTrip(int tripId)
+        {
+            using (var db = new TravelAgencyDbContext())
             {
-                var trip = _tripRepo.GetById(booking.TripId);
-                if (trip != null && trip.RegisteredClientIds != null)
-                {
-                    for (int i = 0; i < booking.PeopleCount; i++)
-                    {
-                        trip.RegisteredClientIds.Remove(booking.ClientId);
-                    }
-                }
+                return db.Bookings
+                    .Include(b => b.Client) 
+                    .Where(b => b.TripId == tripId)
+                    .Select(b => b.Client)
+                    .Where(c => c != null)
+                    .Distinct()
+                    .ToList();
             }
-
-            _bookingRepo.Update(booking);
-            return true;
-        }
-
-        public List<Trip> GetClientTripHistory(int clientId)
-        {
-            var tripIds = _bookingRepo.GetAll()
-                .Where(b => b.ClientId == clientId && b.Status != BookingStatus.Canceled)
-                .Select(b => b.TripId)
-                .Distinct()
-                .ToList();
-
-            return _tripRepo.GetAll()
-                .Where(t => tripIds.Contains(t.Id))
-                .ToList();
-        }
-
-        public int GetAvailableSeatsForTrip(int tripId)
-        {
-            var trip = _tripRepo.GetById(tripId);
-            return trip != null ? trip.AvailableSeats : 0;
         }
     }
 }

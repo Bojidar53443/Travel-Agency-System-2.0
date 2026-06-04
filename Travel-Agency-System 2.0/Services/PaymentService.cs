@@ -3,7 +3,7 @@ using System.Linq;
 using Travel_Agency_System_2._0.Enums;
 using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
-using Travel_Agency_System_2._0.Repositories; 
+using Travel_Agency_System_2._0.Repositories;
 using Travel_Agency_System_2._0.sql_connection;
 
 namespace Travel_Agency_System_2._0.Services
@@ -21,49 +21,35 @@ namespace Travel_Agency_System_2._0.Services
 
         public string ProcessPayment(int bookingId, decimal amount, string method)
         {
-            try
+            var booking = _bookingRepo.GetById(bookingId);
+            if (booking == null) return "Грешка: Резервацията не е намерена.";
+
+            var payment = new Payment
             {
-                var booking = _bookingRepo.GetById(bookingId);
-                if (booking == null) return "Грешка: Резервацията не е намерена.";
+                BookingId = bookingId,
+                Amount = amount,
+                PaymentMethod = method
+            };
 
-                var payment = new Payment
-                {
-                    BookingId = bookingId,
-                    Amount = amount,
-                    PaymentMethod = method
-                };
+            _context.Payments.Add(payment);
+            _context.SaveChanges();
 
-                _context.Payments.Add(payment);
-                _context.SaveChanges();
+            booking.Status = BookingStatus.Active;
+            _bookingRepo.Update(booking);
 
-                booking.Status = BookingStatus.Active;
-                _bookingRepo.Update(booking);
-
-                return $"Плащането на стойност {amount} лв. бе успешно регистрирано за Резервация #{bookingId}.";
-            }
-            catch (Exception)
-            {
-                return "Грешка при обработка на плащането.";
-            }
+            return $"Плащането на стойност {amount} лв. бе успешно регистрирано за Резервация #{bookingId}.";
         }
 
         public decimal GetRemainingBalance(int bookingId)
         {
-            try
-            {
-                var booking = _bookingRepo.GetById(bookingId);
-                if (booking == null) return 0;
+            var booking = _bookingRepo.GetById(bookingId);
+            if (booking == null) return 0;
 
-                decimal paidAmount = _context.Payments
-                    .Where(p => p.BookingId == bookingId)
-                    .Sum(p => p.Amount);
+            decimal paidAmount = _context.Payments
+                .Where(p => p.BookingId == bookingId)
+                .Sum(p => p.Amount);
 
-                return (booking.PeopleCount * 100) - paidAmount;
-            }
-            catch (Exception)
-            {
-                return 0;
-            }
+            return (booking.PeopleCount * 100) - paidAmount;
         }
     }
 }

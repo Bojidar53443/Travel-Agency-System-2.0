@@ -83,9 +83,16 @@ namespace Travel_Agency_System_2._0.UI
                 var history = _bookingMgr.GetClientTripHistory(id);
                 Console.WriteLine($"\n--- ИСТОРИЯ НА ПЪТУВАНИЯТА ЗА КЛИЕНТ #{id} ---");
                 if (!history.Any()) Console.WriteLine("Няма намерени пътувания.");
-                foreach (var trip in history)
+                foreach (var booking in history)
                 {
-                    Console.WriteLine($"- [{trip.StartDate.ToShortDateString()}] {trip.MainDestination}");
+                    if (booking.Trip != null)
+                    {
+                        Console.WriteLine($"- [{booking.Trip.StartDate.ToShortDateString()}] {booking.Trip.MainDestination} | Статус: {booking.Status}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"- Резервация #{booking.Id} (Няма данни за дестинацията) | Статус: {booking.Status}");
+                    }
                 }
             }
         }
@@ -140,20 +147,22 @@ namespace Travel_Agency_System_2._0.UI
                         Console.WriteLine("\n✅ Пътуването е добавено успешно!");
                         break;
 
-                    case "2":
-                        Console.Clear();
-                        Console.WriteLine("--- СПИСЪК С ВСИЧКИ ПЪТУВАНИЯ ---");
-                        var trips = _tripMgr.GetAllTrips();
+                    case "2": 
+                        Console.Write("Въведете ID на пътуването: ");
+                        if (!int.TryParse(Console.ReadLine(), out int tId)) return;
 
-                        if (trips.Count == 0)
+                        var participants = _bookingMgr.GetClientsByTrip(tId);
+
+                        Console.WriteLine($"\n--- УЧАСТНИЦИ В ПЪТУВАНЕ #{tId} ---");
+                        if (participants == null || !participants.Any())
                         {
-                            Console.WriteLine("Няма регистрирани пътувания.");
+                            Console.WriteLine("Няма намерени записани клиенти за това пътуване.");
                         }
                         else
                         {
-                            foreach (var t in trips)
+                            foreach (var client in participants)
                             {
-                                Console.WriteLine($"ID: {t.Id} | Дестинация: {t.MainDestination} | Сезон: {t.Season} | Услуга: {t.ServiceType} | Места: {t.AvailableSeats} | Крайна Цена: {t.Price:F2} лв.");
+                                Console.WriteLine($"- ID: {client.Id} | Име: {client.Name} {client.Surname}");
                             }
                         }
                         break;
@@ -173,12 +182,15 @@ namespace Travel_Agency_System_2._0.UI
                         Console.Clear();
                         Console.WriteLine("--- ДОБАВЯНЕ НА СПИРКА КЪМ ПЪТУВАНЕ ---");
                         Console.Write("ID на пътуване: ");
-                        if (!int.TryParse(Console.ReadLine(), out int tId)) break;
-                        Console.Write("Име на спирка/дестинация за добавяне: ");
+
+                        if (!int.TryParse(Console.ReadLine(), out int tripIdForStop)) break;
+
+                        Console.Write("Име на спирка/дестинация: ");
                         string stop = Console.ReadLine();
 
-                        _tripMgr.AddStopToTrip(tId, stop);
-                        Console.WriteLine("✅ Спирката е добавена успешно!");
+                        _tripMgr.AddStopToTrip(tripIdForStop, stop);
+
+                        Console.WriteLine("✅ Спирката е добавена успешно.");
                         break;
 
                     case "5":
@@ -339,11 +351,16 @@ namespace Travel_Agency_System_2._0.UI
                     {
                         BookingStatus targetStatus = statusChoice == "3" ? BookingStatus.Completed : BookingStatus.Active;
 
-                        bool statusResult = _bookingMgr.UpdateBookingStatus(resId, targetStatus);
-                        if (statusResult)
-                            Console.WriteLine($"\n✅ Статусът е променен на: {targetStatus}");
+                        string statusResult = _bookingMgr.UpdateBookingStatus(resId, targetStatus);
+
+                        if (!statusResult.Contains("не е намерена"))
+                        {
+                            Console.WriteLine($"\n[INFO] Статусът е променен на: {targetStatus}");
+                        }
                         else
+                        {
                             Console.WriteLine("\n❌ Резервацията не е намерена!");
+                        }
                     }
                     break;
 
