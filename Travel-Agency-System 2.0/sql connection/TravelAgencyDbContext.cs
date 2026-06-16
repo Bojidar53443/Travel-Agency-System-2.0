@@ -83,6 +83,12 @@ namespace Travel_Agency_System_2._0.sql_connection
             modelBuilder.Entity<Payment>()
                 .Property(p => p.Amount)
                 .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Booking>()
+            .HasOne(b => b.Trip)
+            .WithMany(t => t.Bookings) 
+            .HasForeignKey(b => b.TripId)
+            .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

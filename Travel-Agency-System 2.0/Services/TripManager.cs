@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
+using Travel_Agency_System_2._0.sql_connection;
 
 namespace Travel_Agency_System_2._0.Services
 {
@@ -52,26 +53,27 @@ namespace Travel_Agency_System_2._0.Services
             }
         }
 
-       
 
-        public void DeleteTrip(int id)
+
+        public string DeleteTrip(int tripId)
         {
-            try
+            using (var db = new TravelAgencyDbContext())
             {
-                var trip = _tripRepo.GetById(id);
-                if (trip != null)
+                
+                var relatedBookings = db.Bookings.Where(b => b.TripId == tripId).ToList();
+                if (relatedBookings.Any())
                 {
-                    _tripRepo.Delete(trip);
-                    Console.WriteLine("\n✅ Пътуването е изтрито успешно!");
+                    db.Bookings.RemoveRange(relatedBookings);
                 }
-                else
-                {
-                    Console.WriteLine("\n❌ Пътуването не е намерено!");
-                }
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("\n❌ Възникна грешка при триенето!");
+
+               
+                var trip = db.Trips.FirstOrDefault(t => t.Id == tripId);
+                if (trip == null) return "Пътуването не е намерено.";
+
+                db.Trips.Remove(trip);
+                db.SaveChanges(); 
+
+                return "Пътуването и всички негови резервации бяха изтрити успешно!";
             }
         }
 
