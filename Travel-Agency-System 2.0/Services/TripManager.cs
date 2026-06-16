@@ -104,14 +104,6 @@ namespace Travel_Agency_System_2._0.Services
 
         public bool ConfirmTripStatus(int tripId, int minParticipants)
         {
-            var trip = _tripRepo.GetById(tripId);
-            if (trip == null) return false;
-
-            return trip.RegisteredClientIds.Count >= minParticipants;
-        }
-
-        public bool IsMinimumCapacityReached(int tripId)
-        {
             using (var db = new TravelAgencyDbContext())
             {
                 var trip = db.Trips.AsNoTracking().FirstOrDefault(t => t.Id == tripId);
@@ -136,10 +128,8 @@ namespace Travel_Agency_System_2._0.Services
                     }
                 }
 
-                return totalPaidPeople >= 5;
+                return totalPaidPeople >= minParticipants;
             }
         }
-
-
     }
 }
