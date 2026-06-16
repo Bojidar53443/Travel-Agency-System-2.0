@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using Travel_Agency_System_2._0.Enums;
 using Travel_Agency_System_2._0.Interfaces;
 using Travel_Agency_System_2._0.Models;
+using Travel_Agency_System_2._0.Repositories;
 using Travel_Agency_System_2._0.sql_connection;
 
 namespace Travel_Agency_System_2._0.Services
@@ -18,7 +19,7 @@ namespace Travel_Agency_System_2._0.Services
         public BookingManager(IBookingRepository bookingRepo, ITripRepository tripRepo)
         {
             _bookingRepo = bookingRepo;
-            _tripRepo = tripRepo;
+            _tripRepo = tripRepo;   
             _context = new TravelAgencyDbContext();
         }
 
@@ -144,6 +145,46 @@ namespace Travel_Agency_System_2._0.Services
                     .Where(c => c != null)
                     .Distinct()
                     .ToList();
+            }
+        }
+
+        public decimal GetBookingTotalPrice(int bookingId)
+        {
+            using (var db = new TravelAgencyDbContext())
+            {
+                var booking = db.Bookings
+                    .AsNoTracking()
+                    .Include(b => b.Trip)
+                    .FirstOrDefault(b => b.Id == bookingId);
+
+                if (booking == null || booking.Trip == null) return 0;
+
+                Enum.TryParse(booking.Trip.Season, true, out Season season);
+
+                ServiceType serviceType;
+                if (booking.Trip.ServiceType.Equals("Premium", StringComparison.OrdinalIgnoreCase))
+                {
+                    serviceType = ServiceType.VIP;
+                }
+                else
+                {
+                    Enum.TryParse(booking.Trip.ServiceType, true, out serviceType);
+                }
+
+                bool hasInsurance = false;
+
+                var tripRepo = new EfTripRepository(db);
+                var calculator = new PricingCalculator(tripRepo);
+
+                decimal pricePerPerson = calculator.CalculateTotalPrice(booking.TripId, season, serviceType, 1, hasInsurance);
+                decimal totalTripPrice = pricePerPerson * booking.PeopleCount;
+
+                decimal paidAmount = db.Payments
+                    .AsNoTracking()
+                    .Where(p => p.BookingId == bookingId)
+                    .Sum(p => (decimal?)p.Amount) ?? 0m;
+
+                return totalTripPrice - paidAmount;
             }
         }
     }

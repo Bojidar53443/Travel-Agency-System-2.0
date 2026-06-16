@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Travel_Agency_System_2._0.Interfaces;
@@ -108,5 +109,37 @@ namespace Travel_Agency_System_2._0.Services
 
             return trip.RegisteredClientIds.Count >= minParticipants;
         }
+
+        public bool IsMinimumCapacityReached(int tripId)
+        {
+            using (var db = new TravelAgencyDbContext())
+            {
+                var trip = db.Trips.AsNoTracking().FirstOrDefault(t => t.Id == tripId);
+                if (trip == null) return false;
+
+                var bookings = db.Bookings
+                    .AsNoTracking()
+                    .Where(b => b.TripId == tripId)
+                    .ToList();
+
+                int totalPaidPeople = 0;
+
+                foreach (var booking in bookings)
+                {
+                    bool hasPaid = db.Payments
+                        .AsNoTracking()
+                        .Any(p => p.BookingId == booking.Id && p.Amount > 0);
+
+                    if (hasPaid)
+                    {
+                        totalPaidPeople += booking.PeopleCount;
+                    }
+                }
+
+                return totalPaidPeople >= 5;
+            }
+        }
+
+
     }
 }

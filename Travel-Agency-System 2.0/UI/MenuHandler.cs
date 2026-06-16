@@ -390,6 +390,7 @@ namespace Travel_Agency_System_2._0.UI
             Console.WriteLine("4. Отчет за приходи от пътувания по период");
             Console.WriteLine("5. Статистика за най-търсени дестинации");
             Console.WriteLine("6. Потвърждаване на пътуване (Минимум участници)");
+            Console.WriteLine("7. Проверяване на дължима сума");
             Console.Write("Избор: ");
             string choice = Console.ReadLine();
 
@@ -467,6 +468,25 @@ namespace Travel_Agency_System_2._0.UI
                     else
                     {
                         Console.WriteLine("⏳ Пътуването все още не е събрало минимум участници.");
+                    }
+                    break;
+
+                case "7":
+                    Console.Clear();
+                    Console.WriteLine("--- ПРОВЕРКА НА ДЪЛЖИМА СУМА ЗА РЕЗЕРВАЦИЯ ---");
+                    Console.Write("Въведете ID на резервация: ");
+
+                    if (!int.TryParse(Console.ReadLine(), out int targetBookingId)) break;
+
+                    decimal totalDue = _bookingMgr.GetBookingTotalPrice(targetBookingId);
+
+                    if (totalDue == 0)
+                    {
+                        Console.WriteLine("Грешка: Резервацията не е намерена или сумата е 0 лв.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\n💰 Обща дължима сума за Резервация #{targetBookingId}: {totalDue} EUR");
                     }
                     break;
             }
