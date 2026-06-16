@@ -19,17 +19,26 @@ namespace Travel_Agency_System_2._0.Services
 
         public List<string> GetParticipantsForTrip(int tripId)
         {
-            var trip = _context.Trips.FirstOrDefault(t => t.Id == tripId);
+            var trip = _context.Trips.AsNoTracking().FirstOrDefault(t => t.Id == tripId);
             if (trip == null) return new List<string> { "Пътуването не е намерено." };
 
+            var paidBookingClientIds = _context.Bookings
+                .AsNoTracking()
+                .Where(b => b.TripId == tripId)
+                .Where(b => _context.Payments.Any(p => p.BookingId == b.Id && p.Amount > 0))
+                .Select(b => b.ClientId)
+                .Distinct()
+                .ToList();
+
             var participants = _context.Clients
-                .Where(c => trip.RegisteredClientIds.Contains(c.Id))
+                .AsNoTracking()
+                .Where(c => paidBookingClientIds.Contains(c.Id))
                 .Select(c => $"- ID: {c.Id} | {c.Name} {c.Surname} ({c.EmailAddress})")
                 .ToList();
 
             if (!participants.Any())
             {
-                return new List<string> { "Няма записани участници за това пътуване." };
+                return new List<string> { "Няма записани (и платени) участници за това пътуване." };
             }
 
             return participants;
