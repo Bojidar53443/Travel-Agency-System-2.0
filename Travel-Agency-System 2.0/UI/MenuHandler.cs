@@ -73,7 +73,7 @@ namespace Travel_Agency_System_2._0.UI
                 Console.Write("Нов Email: "); string email = Console.ReadLine();
 
                 bool success = _clientMgr.UpdateClient(id, phone, email);
-                Console.WriteLine(success ? "\n✅ Данните бяха обновени!" : "\n❌ Клиентът не е намерен!");
+                Console.WriteLine(success ? "\n✅ Данните бяха обновени!" : "\n Клиентът не е намерен!");
             }
             else if (choice == "3")
             {
@@ -230,12 +230,12 @@ namespace Travel_Agency_System_2._0.UI
                             if (trip != null)
                             {
                                 Console.WriteLine($"\n📍 Дестинация: {trip.MainDestination}");
-                                Console.WriteLine($"⏳ Период: {trip.StartDate.ToShortDateString()} - {trip.EndDate.ToShortDateString()}");
-                                Console.WriteLine($"💺 Свободни места: {freeSeats} от общо {trip.MaxCapacity}");
+                                Console.WriteLine($" Период: {trip.StartDate.ToShortDateString()} - {trip.EndDate.ToShortDateString()}");
+                                Console.WriteLine($" Свободни места: {freeSeats} от общо {trip.MaxCapacity}");
                             }
                             else
                             {
-                                Console.WriteLine("\n❌ Пътуване с такова ID не съществува в базата данни.");
+                                Console.WriteLine("\n Пътуване с такова ID не съществува в базата данни.");
                             }
                         }
                         else if (checkChoice == "2")
@@ -266,7 +266,7 @@ namespace Travel_Agency_System_2._0.UI
                         }
                         else
                         {
-                            Console.WriteLine("❌ Невалиден избор!");
+                            Console.WriteLine(" Невалиден избор!");
                         }
                         break;
 
@@ -314,7 +314,7 @@ namespace Travel_Agency_System_2._0.UI
                     if (!int.TryParse(Console.ReadLine(), out int count)) return;
 
                     string result = _bookingMgr.MakeBooking(cId, tId, count);
-                    Console.WriteLine($"\n📢 Резултат: {result}");
+                    Console.WriteLine($"\n Резултат: {result}");
                     break;
 
                 case "2":
@@ -325,7 +325,7 @@ namespace Travel_Agency_System_2._0.UI
                     List<int> clientIds = clientIdsInput.Split(',').Select(int.Parse).ToList();
 
                     string groupRes = _bookingMgr.MakeGroupBooking(clientIds, gTripId);
-                    Console.WriteLine($"\n📢 Резултат: {groupRes}");
+                    Console.WriteLine($"\n Резултат: {groupRes}");
                     break;
 
                 case "3":
@@ -345,7 +345,7 @@ namespace Travel_Agency_System_2._0.UI
                     if (statusChoice == "2")
                     {
                         string cancelResult = _bookingMgr.CancelBooking(resId);
-                        Console.WriteLine($"\n🛑 {cancelResult}");
+                        Console.WriteLine($"\n {cancelResult}");
                     }
                     else
                     {
@@ -359,7 +359,7 @@ namespace Travel_Agency_System_2._0.UI
                         }
                         else
                         {
-                            Console.WriteLine("\n❌ Резервацията не е намерена!");
+                            Console.WriteLine("\n Резервацията не е намерена!");
                         }
                     }
                     break;
@@ -375,7 +375,7 @@ namespace Travel_Agency_System_2._0.UI
                     string method = Console.ReadLine();
 
                     string status = _paymentService.ProcessPayment(payId, amount, method);
-                    Console.WriteLine($"\n📢 {status}");
+                    Console.WriteLine($"\n {status}");
                     break;
             }
         }
