@@ -63,7 +63,7 @@ namespace Travel_Agency_System_2._0.UI
                 Console.Write("Телефон: "); string phone = Console.ReadLine();
 
                 _clientMgr.RegisterClient(fname, lname, email, phone);
-                Console.WriteLine("\n✅ Клиентът е регистриран успешно!");
+                Console.WriteLine("\n Клиентът е регистриран успешно!");
             }
             else if (choice == "2")
             {
@@ -73,7 +73,7 @@ namespace Travel_Agency_System_2._0.UI
                 Console.Write("Нов Email: "); string email = Console.ReadLine();
 
                 bool success = _clientMgr.UpdateClient(id, phone, email);
-                Console.WriteLine(success ? "\n✅ Данните бяха обновени!" : "\n Клиентът не е намерен!");
+                Console.WriteLine(success ? "\n Данните бяха обновени!" : "\n Клиентът не е намерен!");
             }
             else if (choice == "3")
             {
@@ -144,7 +144,7 @@ namespace Travel_Agency_System_2._0.UI
                         string serviceType = Console.ReadLine();
 
                         _tripMgr.CreateTrip(dest, startDate, endDate, capacity, price, season, serviceType);
-                        Console.WriteLine("\n✅ Пътуването е добавено успешно!");
+                        Console.WriteLine("\n Пътуването е добавено успешно!");
                         break;
 
                     case "2": 
@@ -174,7 +174,7 @@ namespace Travel_Agency_System_2._0.UI
                         if (int.TryParse(Console.ReadLine(), out int idToDelete))
                         {
                             _tripMgr.DeleteTrip(idToDelete);
-                            Console.WriteLine("\n🗑️ Пътуването беше премахнато (ако е съществувало).");
+                            Console.WriteLine("\n Пътуването беше премахнато (ако е съществувало).");
                         }
                         break;
 
@@ -190,7 +190,7 @@ namespace Travel_Agency_System_2._0.UI
 
                         _tripMgr.AddStopToTrip(tripIdForStop, stop);
 
-                        Console.WriteLine("✅ Спирката е добавена успешно.");
+                        Console.WriteLine(" Спирката е добавена успешно.");
                         break;
 
                     case "5":
@@ -206,7 +206,7 @@ namespace Travel_Agency_System_2._0.UI
                         if (!decimal.TryParse(Console.ReadLine(), out decimal multiplier)) break;
 
                         _tripMgr.SetPriceRules(tripId, seasonRule, serviceTypeRule, multiplier);
-                        Console.WriteLine("✅ Правилото за ценообразуване е запазено!");
+                        Console.WriteLine(" Правилото за ценообразуване е запазено!");
                         break;
 
                     case "6":
@@ -333,7 +333,7 @@ namespace Travel_Agency_System_2._0.UI
                     Console.Write("Тип услуга (Екскурзия/Застраховка): "); string serviceName = Console.ReadLine();
                     Console.Write("Цена на услугата: "); decimal sPrice = decimal.Parse(Console.ReadLine());
                     _bookingMgr.AddExtraServiceToBooking(bId, serviceName, sPrice);
-                    Console.WriteLine("✅ Допълнителната услуга е добавена към резервацията.");
+                    Console.WriteLine(" Допълнителната услуга е добавена към резервацията.");
                     break;
 
                 case "4":
@@ -447,7 +447,7 @@ namespace Travel_Agency_System_2._0.UI
                     var stats = _reportService.GetTopDestinations();
                     foreach (var pair in stats)
                     {
-                        Console.WriteLine($"📍 {pair.Key}: {pair.Value} резервирани места");
+                        Console.WriteLine($" {pair.Key}: {pair.Value} резервирани места");
                     }
                     break;
 
@@ -463,11 +463,11 @@ namespace Travel_Agency_System_2._0.UI
                     Console.WriteLine();
                     if (confirmed)
                     {
-                        Console.WriteLine("✅ Пътуването е ПОТВЪРДЕНО! Достигнат е минимума.");
+                        Console.WriteLine(" Пътуването е ПОТВЪРДЕНО! Достигнат е минимума.");
                     }
                     else
                     {
-                        Console.WriteLine("⏳ Пътуването все още не е събрало минимум участници.");
+                        Console.WriteLine(" Пътуването все още не е събрало минимум участници.");
                     }
                     break;
 
@@ -486,7 +486,7 @@ namespace Travel_Agency_System_2._0.UI
                     }
                     else
                     {
-                        Console.WriteLine($"\n💰 Обща дължима сума за Резервация #{targetBookingId}: {totalDue} EUR");
+                        Console.WriteLine($"\n Обща дължима сума за Резервация #{targetBookingId}: {totalDue} EUR");
                     }
                     break;
             }
